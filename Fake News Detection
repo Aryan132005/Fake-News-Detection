@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_TEXT_LENGTH 1000
+#define MAX_WORDS 100
+
+char* stopwords[] = {"the", "is", "at", "on", "in", "and", "a", "to", "of", "for"};
+
+int is_stopword(char* word) {
+    for (int i = 0; i < sizeof(stopwords) / sizeof(stopwords[0]); i++) {
+        if (strcmp(word, stopwords[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0; 
+}
+
+void preprocess_text(char* text, char* result) {
+    char word[MAX_TEXT_LENGTH];
+    int j = 0, k = 0;
+
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i])) {
+            word[j++] = tolower(text[i]);
+        } else if (isspace(text[i])) {
+            word[j] = '\0';
+            if (j > 0 && !is_stopword(word)) {
+                strcat(result, word);
+                strcat(result, " ");
+            }
+            j = 0;
+        }
+    }
+    word[j] = '\0';
+    if (j > 0 && !is_stopword(word)) {
+        strcat(result, word);
+    }
+}
+
+int classify_news(char* preprocessed_text) {
+    if (strstr(preprocessed_text, "fake") != NULL || strstr(preprocessed_text, "hoax") != NULL) {
+        return 1; 
+    }
+    return 0; 
+}
+
+int main() {
+    char text[MAX_TEXT_LENGTH], preprocessed_text[MAX_TEXT_LENGTH] = "";
+    
+    printf("Enter the news article text: ");
+    fgets(text, MAX_TEXT_LENGTH, stdin);
+    
+    preprocess_text(text, preprocessed_text);
+
+    printf("Preprocessed Text: %s\n", preprocessed_text);
+    
+    int result = classify_news(preprocessed_text);
+    
+    if (result == 1) {
+        printf("Prediction: Fake News\n");
+    } else {
+        printf("Prediction: Real News\n");
+    }
+    
+    return 0;
+}
